@@ -113,7 +113,7 @@ export const STEPS = [
         options: [
           { value: 'contact',      label: 'Name and contact details (email, phone, postal address)' },
           { value: 'dob',          label: 'Date of birth or age' },
-          { value: 'identity_doc', label: 'Identity documents (passport, driver's licence, proof of age)' },
+          { value: 'identity_doc', label: 'Identity documents (passport, driver\'s licence, proof of age)' },
           { value: 'financial',    label: 'Financial information (bank account, credit card, income, tax details)' },
           { value: 'health',       label: 'Health or medical information (diagnoses, medications, clinical records)' },
           { value: 'employment',   label: 'Employment information (job title, performance records, salary)' },
