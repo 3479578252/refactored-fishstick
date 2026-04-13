@@ -111,7 +111,20 @@ export class Wizard {
           if (value === undefined || value === null) return;
           const el = document.getElementById(field.id);
           if (!el) return;
-          if (field.type === 'checkbox') {
+          if (field.type === 'checkbox-other') {
+            const values = Array.isArray(value) ? value : (value ? [value] : []);
+            const fg = document.getElementById(`fg-${field.id}`);
+            fg?.querySelectorAll(`input[name="${field.id}"]`).forEach(cb => {
+              cb.checked = values.includes(cb.value);
+              if (cb.value === '__other' && cb.checked) {
+                const wrap = document.getElementById(`${field.id}__other-wrap`);
+                if (wrap) wrap.hidden = false;
+              }
+            });
+            const otherVal = this.state[`${field.id}__other`];
+            const otherInput = document.getElementById(`${field.id}__other`);
+            if (otherInput && otherVal) otherInput.value = otherVal;
+          } else if (field.type === 'checkbox') {
             const values = Array.isArray(value) ? value : [value];
             el.closest('fieldset')?.querySelectorAll('input[type="checkbox"]').forEach(cb => {
               cb.checked = values.includes(cb.value);
@@ -238,6 +251,39 @@ export class Wizard {
               <span class="form-error" id="err-${field.id}" aria-live="polite"></span>
             </fieldset>
           </div>`;
+
+      case 'checkbox-other': {
+        const otherId = `${field.id}__other`;
+        return `
+          <div class="form-group" id="fg-${field.id}" ${showIfAttr}>
+            <fieldset>
+              <legend>${field.label}${reqMark}</legend>
+              ${hint}
+              <div class="checkbox-group">
+                ${field.options.map(o => `
+                  <label class="checkbox-item">
+                    <input type="checkbox" name="${field.id}" value="${o.value}">
+                    <span>${o.label}</span>
+                  </label>
+                `).join('')}
+                <div class="checkbox-other-row">
+                  <label class="checkbox-item">
+                    <input type="checkbox" name="${field.id}" value="__other"
+                           class="checkbox-other-trigger" data-reveals="${otherId}">
+                    <span>Other / not listed above</span>
+                  </label>
+                  <div class="checkbox-other-field" id="${otherId}-wrap" hidden>
+                    <label class="visually-hidden" for="${otherId}">Please specify</label>
+                    <input type="text" class="form-input checkbox-other-input"
+                           id="${otherId}" name="${otherId}"
+                           placeholder="Please specify…">
+                  </div>
+                </div>
+              </div>
+              <span class="form-error" id="err-${field.id}" aria-live="polite"></span>
+            </fieldset>
+          </div>`;
+      }
 
       case 'repeating-group':
         return `
@@ -376,6 +422,22 @@ export class Wizard {
       if (el && values[sf.id] !== undefined) el.value = values[sf.id];
     });
 
+    // Wire auto-suggest selects (only populate when target field is empty)
+    item.querySelectorAll('[data-suggest-field]').forEach(selectEl => {
+      const targetFieldId  = selectEl.dataset.suggestField;
+      const suggestions    = JSON.parse(selectEl.dataset.suggestions || '{}');
+      selectEl.addEventListener('change', () => {
+        const suggestion = suggestions[selectEl.value];
+        if (!suggestion) return;
+        const targetEl = item.querySelector(`[name*="[${targetFieldId}]"]`);
+        if (targetEl && !targetEl.value.trim()) {
+          targetEl.value = suggestion;
+          this._collectRepeatingGroup(field.id);
+          this._saveDebounced();
+        }
+      });
+    });
+
     // Attach listeners
     item.addEventListener('input',  () => { this._collectRepeatingGroup(field.id); this._saveDebounced(); });
     item.addEventListener('change', () => { this._collectRepeatingGroup(field.id); this._saveDebounced(); });
@@ -406,14 +468,18 @@ export class Wizard {
             <textarea class="form-textarea" id="${idAttr}" name="${nameAttr}" rows="3"
                       placeholder="${sf.placeholder ?? ''}"></textarea>
           </div>`;
-      case 'select':
+      case 'select': {
+        const suggestAttrs = sf.suggestField
+          ? `data-suggest-field="${sf.suggestField}" data-suggestions='${JSON.stringify(sf.suggestions ?? {})}'`
+          : '';
         return `
           <div class="form-group ${full}">
             <label class="form-label" for="${idAttr}">${sf.label}${sf.required ? '<span class="form-required">*</span>' : ''}</label>
-            <select class="form-select" id="${idAttr}" name="${nameAttr}">
+            <select class="form-select" id="${idAttr}" name="${nameAttr}" ${suggestAttrs}>
               ${sf.options.map(o => `<option value="${o.value}">${o.label}</option>`).join('')}
             </select>
           </div>`;
+      }
       default:
         return '';
     }
@@ -481,6 +547,12 @@ export class Wizard {
         this._collectRepeatingGroup(field.id);
       } else if (field.type === 'app-table') {
         this._collectAppTable(field.apps);
+      } else if (field.type === 'checkbox-other') {
+        this.state[field.id] = Array.from(
+          document.querySelectorAll(`input[name="${field.id}"]:checked`)
+        ).map(el => el.value);
+        const otherInput = document.getElementById(`${field.id}__other`);
+        if (otherInput) this.state[`${field.id}__other`] = otherInput.value;
       } else if (field.type === 'checkbox') {
         const checked = Array.from(
           document.querySelectorAll(`input[name="${field.id}"]:checked`)
@@ -518,7 +590,7 @@ export class Wizard {
 
       if (field.type === 'radio') {
         value = document.querySelector(`input[name="${field.id}"]:checked`)?.value;
-      } else if (field.type === 'checkbox') {
+      } else if (field.type === 'checkbox-other' || field.type === 'checkbox') {
         value = Array.from(document.querySelectorAll(`input[name="${field.id}"]:checked`));
         value = value.length > 0 ? value : null;
       } else if (field.type === 'repeating-group') {
@@ -614,6 +686,20 @@ export class Wizard {
   /* ── Change handler ─────────────────────────────────────────── */
 
   _onFieldChange(e) {
+    // Toggle "Other" reveal for checkbox-other fields
+    if (e.target.matches('.checkbox-other-trigger')) {
+      const wrap = document.getElementById(`${e.target.dataset.reveals}-wrap`);
+      if (wrap) wrap.hidden = !e.target.checked;
+    }
+
+    // Collect __other text input changes immediately
+    if (e.target.name?.endsWith('__other')) {
+      this.state[e.target.name] = e.target.value;
+      this._showSaving();
+      this._saveDebounced();
+      return;
+    }
+
     this._updateConditionalVisibility();
     const step = this.steps[this.currentStep];
     step?.fields.forEach(field => {
@@ -622,10 +708,14 @@ export class Wizard {
       if (el.name === field.id || el.id === field.id) {
         if (field.type === 'radio') {
           this.state[field.id] = document.querySelector(`input[name="${field.id}"]:checked`)?.value ?? '';
-        } else if (field.type === 'checkbox') {
+        } else if (field.type === 'checkbox' || field.type === 'checkbox-other') {
           this.state[field.id] = Array.from(
             document.querySelectorAll(`input[name="${field.id}"]:checked`)
           ).map(cb => cb.value);
+          if (field.type === 'checkbox-other') {
+            const oi = document.getElementById(`${field.id}__other`);
+            if (oi) this.state[`${field.id}__other`] = oi.value;
+          }
         } else {
           this.state[field.id] = el.value;
         }

@@ -212,6 +212,36 @@
 .save-indicator--saving  .save-indicator__dot { background: var(--color-accent); }
 .save-indicator--saved   .save-indicator__dot { background: var(--color-success); }
 
+/* ── Checkbox-other (reveal on "Other" tick) ───────────────── */
+.checkbox-other-row {
+  display:        flex;
+  flex-direction: column;
+  gap:            var(--space-2);
+}
+.checkbox-other-field {
+  margin-left:    calc(20px + var(--space-3)); /* align with checkbox label text */
+  margin-top:     var(--space-1);
+}
+.checkbox-other-input {
+  max-width: 480px;
+}
+/* Smooth reveal */
+.checkbox-other-field:not([hidden]) {
+  animation: fadeIn 0.15s ease;
+}
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+/* Risk suggest banner (appears under risk_category select when suggestion is auto-filled) */
+.suggest-hint {
+  display:        flex;
+  align-items:    center;
+  gap:            var(--space-2);
+  font-size:      var(--font-size-xs);
+  color:          var(--color-primary);
+  margin-top:     var(--space-1);
+  font-style:     italic;
+}
+
 /* ── Repeating group (risk register rows) ──────────────────── */
 .repeating-group { margin-top: var(--space-4); }
 .repeating-group__item {
