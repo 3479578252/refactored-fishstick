@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Full PIA — Privacy Impact Assessment Tool</title>
+  <meta name="description" content="Complete a full Privacy Impact Assessment (PIA) under the Privacy Act 1988 (Cth), including APP compliance checklist and detailed risk register.">
+  <link rel="stylesheet" href="css/agds.css">
+  <link rel="stylesheet" href="css/wizard.css">
+  <script src="https://cdn.jsdelivr.net/npm/docx@8/build/index.js"></script>
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  <header class="site-header" role="banner">
+    <div class="site-header__inner">
+      <a class="site-header__logo" href="index.html" aria-label="Home — Privacy Impact Assessment Tool">
+        <div class="site-header__logo-mark" aria-hidden="true">YOUR<br>ORG</div>
+        <div>
+          <div class="site-header__org-name">[Your Organisation Name]</div>
+          <div class="site-header__site-name">Privacy Impact Assessment Tool</div>
+        </div>
+      </a>
+    </div>
+  </header>
+
+  <main id="main-content" class="page-main">
+
+    <nav aria-label="Breadcrumb">
+      <ol class="breadcrumb">
+        <li><a href="index.html">Home</a></li>
+        <li><span aria-current="page">Full Privacy Impact Assessment</span></li>
+      </ol>
+    </nav>
+
+    <div class="callout callout--warning" role="note">
+      <p class="callout__title">Full PIA — comprehensive assessment required</p>
+      <p>
+        This assessment covers all aspects of the OAIC Full PIA template, including
+        stakeholder consultation, APP compliance, and a detailed risk register.
+        Allow sufficient time to complete all sections thoroughly.
+      </p>
+    </div>
+
+    <div class="import-bar" role="region" aria-label="Import saved assessment">
+      <span class="import-bar__label">Resume a saved assessment:</span>
+      <label for="import-file" class="visually-hidden">Upload JSON file</label>
+      <input class="import-bar__file" type="file" id="import-file" accept=".json"
+             aria-label="Upload previously exported JSON file">
+    </div>
+
+    <ol class="step-indicator" id="step-indicator" aria-label="Assessment progress"></ol>
+
+    <div class="wizard" role="form" aria-label="Full Privacy Impact Assessment">
+      <div class="wizard__header">
+        <h1 class="wizard__title">Full Privacy Impact Assessment</h1>
+        <p class="wizard__subtitle">
+          Based on the OAIC Full PIA template. Complete all eight sections,
+          then download your assessment as a Word document or JSON file.
+        </p>
+      </div>
+      <div class="wizard__body">
+        <div id="wizard-steps"></div>
+
+        <!-- Results view -->
+        <div class="results-view" id="results-view" aria-live="polite">
+
+          <div class="result-outcome result-outcome--complete">
+            <svg class="result-outcome__icon" viewBox="0 0 48 48" fill="none"
+                 stroke="#0B7B39" stroke-width="3" aria-hidden="true">
+              <circle cx="24" cy="24" r="22"/>
+              <polyline points="14 24 20 32 34 16"/>
+            </svg>
+            <div class="result-outcome__content">
+              <h2 class="result-outcome__title">Full PIA complete</h2>
+              <p>Your assessment has been saved. Download the results below, or amend your answers.</p>
+            </div>
+          </div>
+
+          <div class="results-actions" role="group" aria-label="Download options">
+            <button class="btn btn--primary" id="btn-download-json" type="button">
+              Download JSON
+            </button>
+            <button class="btn btn--secondary" id="btn-download-docx" type="button">
+              Download Word (.docx)
+            </button>
+            <button class="btn btn--tertiary" id="btn-amend" type="button">
+              ← Amend answers
+            </button>
+          </div>
+
+          <div class="results-summary" id="results-summary">
+            <h3>Assessment summary</h3>
+            <div id="summary-content"></div>
+          </div>
+
+        </div>
+      </div>
+      <div class="wizard__footer" id="wizard-footer"></div>
+    </div>
+
+  </main>
+
+  <footer class="site-footer" role="contentinfo">
+    <div class="site-footer__inner">
+      <p>
+        Based on the
+        <a href="https://www.oaic.gov.au/privacy/privacy-guidance-for-organisations-and-government-agencies/privacy-impact-assessments"
+           target="_blank" rel="noopener noreferrer">OAIC PIA Guide</a>
+        and the <em>Privacy Act 1988</em> (Cth).
+      </p>
+      <p><strong>Disclaimer:</strong> This tool does not constitute legal advice.
+        Refer to the OAIC for authoritative guidance and consult a legal practitioner.</p>
+      <p>&copy; <span id="footer-year"></span> [Your Organisation Name].</p>
+    </div>
+  </footer>
+
+  <script type="module">
+    import { Wizard }          from './js/wizard.js';
+    import { STEPS, ASSESSMENT_TYPE } from './js/questions/full-pia.js';
+    import { downloadJSON, downloadDOCX } from './js/export.js';
+
+    const wizard = new Wizard({
+      steps: STEPS,
+      type:  ASSESSMENT_TYPE,
+      onComplete(state) {
+        showResults(state);
+      },
+    });
+    wizard.init();
+
+    // ── Results ─────────────────────────────────────────────────
+    function showResults(state) {
+      document.getElementById('wizard-footer').style.display = 'none';
+      document.getElementById('step-indicator').style.display = 'none';
+      document.getElementById('results-view').classList.add('is-active');
+      renderSummary(state);
+    }
+
+    function renderSummary(state) {
+      const container = document.getElementById('summary-content');
+      let html = '';
+      STEPS.forEach(step => {
+        html += `<div class="summary-section">
+          <div class="summary-section__title">${step.title}</div>`;
+        step.fields.forEach(field => {
+          if (field.type === 'repeating-group') {
+            const items = Array.isArray(state[field.id]) ? state[field.id] : [];
+            if (items.length === 0) return;
+            html += `<div class="summary-field">
+              <span class="summary-field__label">${field.label}</span>
+              <span class="summary-field__value">${items.length} item(s) recorded</span>
+            </div>`;
+            return;
+          }
+          if (field.type === 'app-table') {
+            const apps = state.apps ?? {};
+            const completed = Object.values(apps).filter(a => a.applicable && a.applicable !== '').length;
+            html += `<div class="summary-field">
+              <span class="summary-field__label">APP compliance checklist</span>
+              <span class="summary-field__value">${completed} of 13 APPs assessed</span>
+            </div>`;
+            return;
+          }
+          const raw = state[field.id];
+          if (raw === undefined || raw === null || raw === '') return;
+          const val = Array.isArray(raw) ? raw.join(', ') : raw;
+          html += `<div class="summary-field">
+            <span class="summary-field__label">${field.label}</span>
+            <span class="summary-field__value">${val}</span>
+          </div>`;
+        });
+        html += '</div>';
+      });
+      container.innerHTML = html;
+    }
+
+    // ── Downloads ───────────────────────────────────────────────
+    document.getElementById('btn-download-json').addEventListener('click', () => {
+      const state = wizard.getState();
+      downloadJSON({ type: ASSESSMENT_TYPE, state, projectName: state.project_name });
+    });
+
+    document.getElementById('btn-download-docx').addEventListener('click', async () => {
+      const state = wizard.getState();
+      await downloadDOCX({ type: ASSESSMENT_TYPE, state, steps: STEPS });
+    });
+
+    document.getElementById('btn-amend').addEventListener('click', () => {
+      document.getElementById('results-view').classList.remove('is-active');
+      document.getElementById('wizard-footer').style.display = '';
+      document.getElementById('step-indicator').style.display = '';
+      wizard.currentStep = 0;
+      wizard._updateUI();
+    });
+
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+  </script>
+
+</body>
+</html>
