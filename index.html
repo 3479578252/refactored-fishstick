@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Impact Assessment Tool</title>
+  <meta name="description" content="Conduct a Privacy Impact Assessment (PIA) under the Privacy Act 1988 (Cth) and the Australian Privacy Principles.">
+  <link rel="stylesheet" href="css/agds.css">
+  <link rel="stylesheet" href="css/wizard.css">
+</head>
+<body>
+
+  <!-- Skip navigation -->
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  <!-- Site header -->
+  <header class="site-header" role="banner">
+    <div class="site-header__inner">
+      <a class="site-header__logo" href="index.html" aria-label="Home — Privacy Impact Assessment Tool">
+        <div class="site-header__logo-mark" aria-hidden="true">YOUR<br>ORG</div>
+        <div>
+          <div class="site-header__org-name">[Your Organisation Name]</div>
+          <div class="site-header__site-name">Privacy Impact Assessment Tool</div>
+        </div>
+      </a>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <div class="hero" role="presentation">
+    <div class="hero__inner">
+      <p class="hero__eyebrow">Privacy Act 1988 (Cth)</p>
+      <h1 class="hero__title">Privacy Impact Assessment Tool</h1>
+      <p class="hero__subtitle">
+        Identify and manage privacy risks in your projects, in accordance with
+        the Australian Privacy Principles and OAIC guidance.
+      </p>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <main id="main-content" class="page-main">
+
+    <!-- What is a PIA callout -->
+    <div class="callout callout--info" role="note">
+      <p class="callout__title">What is a Privacy Impact Assessment?</p>
+      <p>
+        A Privacy Impact Assessment (PIA) is a systematic process for identifying and addressing
+        privacy risks in a project or activity. The
+        <a href="https://www.oaic.gov.au/privacy/privacy-guidance-for-organisations-and-government-agencies/privacy-impact-assessments"
+           target="_blank" rel="noopener noreferrer">
+          Office of the Australian Information Commissioner (OAIC)
+        </a>
+        recommends that organisations conduct a PIA whenever a new project or activity
+        may have a significant impact on the privacy of individuals.
+      </p>
+    </div>
+
+    <!-- Assessment cards -->
+    <section aria-labelledby="assessments-heading">
+      <h2 class="section-heading" id="assessments-heading">Choose an assessment</h2>
+      <p class="section-intro">
+        Start with the Threshold Assessment to determine whether a PIA is required,
+        or go directly to a Short-form or Full PIA if you already know what you need.
+      </p>
+
+      <div class="card-grid">
+
+        <!-- Threshold Assessment -->
+        <a class="card card--link card--primary-border" href="threshold.html"
+           aria-label="Start Threshold Assessment">
+          <span class="card__tag card__tag--blue">Step 1</span>
+          <h3 class="card__title">Threshold Assessment</h3>
+          <p class="card__body">
+            Answer a series of questions to determine whether a PIA is required
+            and, if so, whether a short-form or full PIA is appropriate.
+          </p>
+          <p class="mt-4">
+            <span class="btn btn--primary btn--sm" aria-hidden="true">Start →</span>
+          </p>
+        </a>
+
+        <!-- Short-form PIA -->
+        <a class="card card--link card--primary-border" href="short-pia.html"
+           aria-label="Start Short-form PIA">
+          <span class="card__tag card__tag--gold">Short-form</span>
+          <h3 class="card__title">Short-form PIA</h3>
+          <p class="card__body">
+            A concise PIA covering project overview, personal information involved,
+            information flows, a privacy risk register, and recommendations.
+            Suitable for lower-risk projects.
+          </p>
+          <p class="mt-4">
+            <span class="btn btn--secondary btn--sm" aria-hidden="true">Start →</span>
+          </p>
+        </a>
+
+        <!-- Full PIA -->
+        <a class="card card--link card--primary-border" href="full-pia.html"
+           aria-label="Start Full PIA">
+          <span class="card__tag card__tag--green">Full PIA</span>
+          <h3 class="card__title">Full Privacy Impact Assessment</h3>
+          <p class="card__body">
+            A comprehensive PIA including stakeholder consultation, detailed
+            information flows, an APP compliance checklist, risk register,
+            recommendations, and sign-off. Required for high-risk projects.
+          </p>
+          <p class="mt-4">
+            <span class="btn btn--secondary btn--sm" aria-hidden="true">Start →</span>
+          </p>
+        </a>
+
+      </div>
+    </section>
+
+    <!-- Guidance -->
+    <section class="guidance" aria-labelledby="guidance-heading">
+      <h3 id="guidance-heading">When should I conduct a PIA?</h3>
+      <div class="guidance-grid">
+        <div class="guidance-item">
+          <p class="guidance-item__heading">No PIA required</p>
+          <p>The project does not involve personal information, or continues existing
+             practices without significant change and carries negligible privacy risk.</p>
+        </div>
+        <div class="guidance-item">
+          <p class="guidance-item__heading">Short-form PIA</p>
+          <p>The project involves personal information with limited risk indicators —
+             for example, a small number of individuals, no sensitive data, and well-understood
+             information flows.</p>
+        </div>
+        <div class="guidance-item">
+          <p class="guidance-item__heading">Full PIA</p>
+          <p>The project involves sensitive information, a large volume of personal data,
+             new technology, data matching, or overseas transfers — or the privacy risks
+             are complex or uncertain.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section aria-labelledby="features-heading" class="mt-8">
+      <h2 class="section-heading" id="features-heading">How this tool works</h2>
+      <div class="card-grid">
+        <div class="card">
+          <h4 class="card__title" style="font-size:1rem">Auto-saves your progress</h4>
+          <p class="card__body">
+            Your answers are automatically saved in your browser as you type.
+            Return to the same page to pick up where you left off.
+          </p>
+        </div>
+        <div class="card">
+          <h4 class="card__title" style="font-size:1rem">Export as Word or JSON</h4>
+          <p class="card__body">
+            When you complete an assessment, download a formatted Word document
+            (.docx) for sharing, or a JSON file to amend the assessment later.
+          </p>
+        </div>
+        <div class="card">
+          <h4 class="card__title" style="font-size:1rem">Import and amend</h4>
+          <p class="card__body">
+            Upload a previously exported JSON file to resume or update a completed
+            assessment — all your answers will be restored.
+          </p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Site footer -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="site-footer__inner">
+      <p>
+        This tool is based on the
+        <a href="https://www.oaic.gov.au/privacy/privacy-guidance-for-organisations-and-government-agencies/privacy-impact-assessments"
+           target="_blank" rel="noopener noreferrer">
+          OAIC Privacy Impact Assessment guide
+        </a>
+        and the <em>Privacy Act 1988</em> (Cth) and Australian Privacy Principles.
+      </p>
+      <p>
+        <strong>Disclaimer:</strong> This tool does not constitute legal advice.
+        Refer to the OAIC for authoritative guidance and consult a legal practitioner.
+      </p>
+      <p>&copy; <span id="footer-year"></span> [Your Organisation Name]. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+  </script>
+
+</body>
+</html>
