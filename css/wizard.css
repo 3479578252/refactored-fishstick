@@ -472,3 +472,125 @@
   .guidance { padding: var(--space-5) var(--space-4); }
   .guidance-grid { grid-template-columns: 1fr; gap: var(--space-4); }
 }
+
+/* ── Suggest-risks button ───────────────────────────────────── */
+.suggest-risks-btn {
+  display:     inline-flex;
+  align-items: center;
+  gap:         var(--space-2);
+  margin-top:  var(--space-4);
+  margin-bottom: var(--space-2);
+}
+
+/* ── Suggest-risks modal (<dialog>) ────────────────────────── */
+.suggest-modal {
+  position:      fixed;
+  inset:         0;
+  margin:        auto;
+  width:         min(640px, 92vw);
+  max-height:    85vh;
+  display:       flex;
+  flex-direction: column;
+  padding:       0;
+  border:        1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background:    var(--color-bg);
+  box-shadow:    0 8px 32px rgba(0,0,0,0.18);
+  overflow:      hidden;
+}
+.suggest-modal::backdrop {
+  background: rgba(0, 0, 0, 0.45);
+}
+.suggest-modal__header {
+  display:         flex;
+  align-items:     center;
+  justify-content: space-between;
+  padding:         var(--space-5) var(--space-6);
+  border-bottom:   1px solid var(--color-border);
+  flex-shrink:     0;
+}
+.suggest-modal__header h2 {
+  margin:      0;
+  font-size:   var(--font-size-lg);
+  font-weight: 700;
+  color:       var(--color-text);
+}
+.suggest-modal__intro {
+  padding:     var(--space-4) var(--space-6) 0;
+  font-size:   var(--font-size-sm);
+  color:       var(--color-text-muted);
+  flex-shrink: 0;
+  margin:      0;
+}
+.suggest-modal__body {
+  flex:       1 1 auto;
+  overflow-y: auto;
+  padding:    var(--space-3) var(--space-6);
+}
+.suggest-modal__footer {
+  display:         flex;
+  align-items:     center;
+  justify-content: flex-end;
+  gap:             var(--space-3);
+  padding:         var(--space-4) var(--space-6);
+  border-top:      1px solid var(--color-border);
+  flex-shrink:     0;
+  background:      var(--color-surface);
+}
+
+/* Individual risk rows inside the modal */
+.suggest-risk-item {
+  display:        flex;
+  align-items:    flex-start;
+  gap:            var(--space-4);
+  padding:        var(--space-4) 0;
+  border-bottom:  1px solid var(--color-border);
+  cursor:         pointer;
+}
+.suggest-risk-item:last-child {
+  border-bottom: none;
+}
+.suggest-risk-item input[type="checkbox"] {
+  flex-shrink: 0;
+  margin-top:  3px;
+  width:       18px;
+  height:      18px;
+  cursor:      pointer;
+  accent-color: var(--color-primary);
+}
+.suggest-risk-item__content {
+  flex: 1;
+}
+.suggest-risk-item__title {
+  font-size:   var(--font-size-sm);
+  font-weight: 600;
+  color:       var(--color-text);
+  display:     block;
+  margin-bottom: var(--space-1);
+}
+.suggest-risk-item__desc {
+  font-size:   var(--font-size-sm);
+  color:       var(--color-text);
+  margin:      0 0 var(--space-2) 0;
+}
+.suggest-risk-item__meta {
+  font-size:  var(--font-size-sm);
+  color:      var(--color-text-muted);
+  margin:     0;
+}
+
+/* Empty state */
+.suggest-risks-empty {
+  padding:   var(--space-6) 0;
+  color:     var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .suggest-modal { max-height: 95vh; }
+  .suggest-modal__header,
+  .suggest-modal__body,
+  .suggest-modal__footer { padding-left: var(--space-4); padding-right: var(--space-4); }
+  .suggest-modal__intro { padding-left: var(--space-4); padding-right: var(--space-4); }
+}

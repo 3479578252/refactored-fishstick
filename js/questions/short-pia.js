@@ -8,6 +8,29 @@
 
 export const ASSESSMENT_TYPE = 'short';
 
+/**
+ * Suggested treatment text keyed by risk category.
+ * Used by the risk register's auto-suggest feature and by the
+ * "Suggest risks from your answers" import button.
+ */
+export const RISK_SUGGESTIONS = {
+  'unauthorised_access':   'Implement multi-factor authentication (MFA) and role-based access controls (RBAC). Conduct regular user access reviews. Encrypt data at rest and in transit. Monitor access logs for anomalies.',
+  'data_breach':           'Develop and test a Data Breach Response Plan aligned to the updated NDB scheme (Privacy and Other Legislation Amendment Act 2024). Establish clear internal triage and escalation procedures. Notify affected individuals and the OAIC promptly if a breach is eligible — the 2024 Act introduces tighter timelines and more granular notification thresholds. Conduct a post-incident review and update controls accordingly.',
+  'excessive_collection':  'Apply data minimisation principles — only collect what is reasonably necessary for the stated purpose (APP 3). Review all collection forms and remove unnecessary fields. Document the justification for each data element collected.',
+  'poor_data_quality':     'Implement validation checks at collection to ensure accuracy. Provide individuals with access and correction rights (APP 12, APP 13). Schedule regular data quality reviews and cleansing processes.',
+  'insecure_storage':      'Encrypt stored data (AES-256 or equivalent). Apply secure configuration baselines to all systems. Conduct regular vulnerability assessments and penetration testing. Implement backup and recovery procedures.',
+  'unlawful_use':          'Review all use and disclosure activities against APP 6. Obtain appropriate consent or identify another lawful basis. Update privacy notices to accurately reflect actual data processing. Brief staff on permitted uses.',
+  'lack_of_transparency':  'Update the Privacy Policy and collection notices to clearly describe how personal information is handled. Ensure notices are written in plain language and made easily accessible. Conduct a review against APP 1 and APP 5 requirements.',
+  'excessive_retention':   'Implement an automated data retention and disposal schedule. Set system triggers for deletion at the end of the retention period. Conduct periodic audits of data holdings against the documented retention policy.',
+  'cross_border':          'Review cross-border disclosure arrangements against APP 8. Implement appropriate contractual protections (e.g. Standard Contractual Clauses). Assess whether the destination country has comparable privacy protections. Document the basis for transfer.',
+  'identity_fraud':        'Apply strict controls on use of government identifiers (APP 9). Limit collection and use of TFN, Medicare number and similar identifiers to legally authorised purposes only. Implement strong authentication and fraud monitoring.',
+  'inadequate_consent':    'Review consent mechanisms to ensure they are freely given, specific, informed, and unambiguous. Provide clear opt-out mechanisms. Document consent records. Ensure consent is refreshed when processing purposes change.',
+  'doxxing':               'Implement strict access controls to prevent unauthorised sharing of personal information via public channels. The Privacy and Other Legislation Amendment Act 2024 (Cth) introduces criminal offences for doxxing (malicious public disclosure of personal data). Conduct staff training on acceptable information handling. Monitor public-facing outputs (e.g. generated content, directories) for inadvertent personal information exposure. Establish an incident reporting pathway.',
+  'childrens_privacy':     'Comply with the Children\'s Online Privacy Code (Privacy and Other Legislation Amendment Act 2024). Implement age verification or age assurance mechanisms proportionate to risk. Obtain enhanced parental or guardian consent for children under 16. Apply strict data minimisation — collect only what is necessary for the service. Disable behavioural profiling and targeted advertising for users under 16. Document compliance steps and review regularly.',
+  'targeting_profiling':   'Establish a clear, accessible opt-out mechanism for direct marketing and targeting, as required under the Privacy and Other Legislation Amendment Act 2024 (Cth). Maintain suppression lists and honour opt-out requests within the required timeframe. Review all profiling and targeting activities to ensure they are disclosed in the Privacy Policy and collection notices. Cease targeted advertising to individuals who have opted out.',
+  'privacy_tort':          'The Privacy and Other Legislation Amendment Act 2024 (Cth) introduces a statutory tort for serious invasions of privacy. Minimise the risk of individual legal action by: ensuring a lawful basis for all processing activities; avoiding highly intrusive data uses without clear justification; providing meaningful transparency and control to individuals; and establishing an accessible privacy complaint mechanism that resolves concerns promptly at first contact.',
+};
+
 export const STEPS = [
   /* ── Section 1: Project overview ──────────────────────────── */
   {
@@ -432,23 +455,7 @@ export const STEPS = [
             label:        'Risk category',
             required:     true,
             suggestField: 'treatment',
-            suggestions:  {
-              'unauthorised_access':   'Implement multi-factor authentication (MFA) and role-based access controls (RBAC). Conduct regular user access reviews. Encrypt data at rest and in transit. Monitor access logs for anomalies.',
-              'data_breach':           'Develop and test a Data Breach Response Plan aligned to the updated NDB scheme (Privacy and Other Legislation Amendment Act 2024). Establish clear internal triage and escalation procedures. Notify affected individuals and the OAIC promptly if a breach is eligible — the 2024 Act introduces tighter timelines and more granular notification thresholds. Conduct a post-incident review and update controls accordingly.',
-              'excessive_collection':  'Apply data minimisation principles — only collect what is reasonably necessary for the stated purpose (APP 3). Review all collection forms and remove unnecessary fields. Document the justification for each data element collected.',
-              'poor_data_quality':     'Implement validation checks at collection to ensure accuracy. Provide individuals with access and correction rights (APP 12, APP 13). Schedule regular data quality reviews and cleansing processes.',
-              'insecure_storage':      'Encrypt stored data (AES-256 or equivalent). Apply secure configuration baselines to all systems. Conduct regular vulnerability assessments and penetration testing. Implement backup and recovery procedures.',
-              'unlawful_use':          'Review all use and disclosure activities against APP 6. Obtain appropriate consent or identify another lawful basis. Update privacy notices to accurately reflect actual data processing. Brief staff on permitted uses.',
-              'lack_of_transparency':  'Update the Privacy Policy and collection notices to clearly describe how personal information is handled. Ensure notices are written in plain language and made easily accessible. Conduct a review against APP 1 and APP 5 requirements.',
-              'excessive_retention':   'Implement an automated data retention and disposal schedule. Set system triggers for deletion at the end of the retention period. Conduct periodic audits of data holdings against the documented retention policy.',
-              'cross_border':          'Review cross-border disclosure arrangements against APP 8. Implement appropriate contractual protections (e.g. Standard Contractual Clauses). Assess whether the destination country has comparable privacy protections. Document the basis for transfer.',
-              'identity_fraud':        'Apply strict controls on use of government identifiers (APP 9). Limit collection and use of TFN, Medicare number and similar identifiers to legally authorised purposes only. Implement strong authentication and fraud monitoring.',
-              'inadequate_consent':    'Review consent mechanisms to ensure they are freely given, specific, informed, and unambiguous. Provide clear opt-out mechanisms. Document consent records. Ensure consent is refreshed when processing purposes change.',
-              'doxxing':               'Implement strict access controls to prevent unauthorised sharing of personal information via public channels. The Privacy and Other Legislation Amendment Act 2024 (Cth) introduces criminal offences for doxxing (malicious public disclosure of personal data). Conduct staff training on acceptable information handling. Monitor public-facing outputs (e.g. generated content, directories) for inadvertent personal information exposure. Establish an incident reporting pathway.',
-              'childrens_privacy':     'Comply with the Children\'s Online Privacy Code (Privacy and Other Legislation Amendment Act 2024). Implement age verification or age assurance mechanisms proportionate to risk. Obtain enhanced parental or guardian consent for children under 16. Apply strict data minimisation — collect only what is necessary for the service. Disable behavioural profiling and targeted advertising for users under 16. Document compliance steps and review regularly.',
-              'targeting_profiling':   'Establish a clear, accessible opt-out mechanism for direct marketing and targeting, as required under the Privacy and Other Legislation Amendment Act 2024 (Cth). Maintain suppression lists and honour opt-out requests within the required timeframe. Review all profiling and targeting activities to ensure they are disclosed in the Privacy Policy and collection notices. Cease targeted advertising to individuals who have opted out.',
-              'privacy_tort':          'The Privacy and Other Legislation Amendment Act 2024 (Cth) introduces a statutory tort for serious invasions of privacy. Minimise the risk of individual legal action by: ensuring a lawful basis for all processing activities; avoiding highly intrusive data uses without clear justification; providing meaningful transparency and control to individuals; and establishing an accessible privacy complaint mechanism that resolves concerns promptly at first contact.',
-            },
+            suggestions:  RISK_SUGGESTIONS,
             options: [
               { value: '',                    label: '— Select a risk category —' },
               { value: 'unauthorised_access',  label: 'Unauthorised access to personal information' },
