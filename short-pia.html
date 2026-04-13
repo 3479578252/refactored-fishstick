@@ -46,8 +46,9 @@
       <div class="wizard__header">
         <h1 class="wizard__title">Short-form Privacy Impact Assessment</h1>
         <p class="wizard__subtitle">
-          Based on the OAIC Short-form PIA template. Complete all sections,
-          then download your assessment as a Word document or JSON file.
+          Based on the OAIC Short-form PIA template, updated for the
+          <em>Privacy and Other Legislation Amendment Act 2024</em> (Cth).
+          Complete all sections, then download your assessment as a Word document or JSON file.
         </p>
       </div>
       <div class="wizard__body">
@@ -97,8 +98,9 @@
       <p>
         Based on the
         <a href="https://www.oaic.gov.au/privacy/privacy-guidance-for-organisations-and-government-agencies/privacy-impact-assessments"
-           target="_blank" rel="noopener noreferrer">OAIC PIA Guide</a>
-        and the <em>Privacy Act 1988</em> (Cth).
+           target="_blank" rel="noopener noreferrer">OAIC PIA Guide</a>,
+        the <em>Privacy Act 1988</em> (Cth), and the
+        <em>Privacy and Other Legislation Amendment Act 2024</em> (Cth).
       </p>
       <p><strong>Disclaimer:</strong> This tool does not constitute legal advice.
         Refer to the OAIC for authoritative guidance and consult a legal practitioner.</p>
@@ -146,7 +148,16 @@
           }
           const raw = state[field.id];
           if (raw === undefined || raw === null || raw === '') return;
-          const val = Array.isArray(raw) ? raw.join(', ') : raw;
+          let val;
+          if (field.type === 'checkbox-other' && Array.isArray(raw)) {
+            // Replace the sentinel '__other' with the free-text value the user typed.
+            let vals = raw.filter(v => v !== '__other');
+            const otherText = state[`${field.id}__other`];
+            if (otherText) vals.push(otherText);
+            val = vals.join(', ');
+          } else {
+            val = Array.isArray(raw) ? raw.join(', ') : raw;
+          }
           html += `<div class="summary-field">
             <span class="summary-field__label">${field.label}</span>
             <span class="summary-field__value">${val}</span>

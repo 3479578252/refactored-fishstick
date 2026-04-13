@@ -180,7 +180,17 @@ export async function downloadDOCX({ type, state, steps, outcome }) {
         const value = state[field.id];
         if (value === undefined || value === null || value === '') return;
         children.push(_heading3(field.label));
-        const display = Array.isArray(value) ? value.join('\n') : String(value);
+        let display;
+        if (Array.isArray(value)) {
+          // For checkbox-other fields, replace the sentinel '__other' with the
+          // actual free-text value the user typed.
+          let vals = value.filter(v => v !== '__other');
+          const otherText = state[`${field.id}__other`];
+          if (otherText) vals.push(otherText);
+          display = vals.join('\n') || '—';
+        } else {
+          display = String(value);
+        }
         display.split('\n').forEach(line => children.push(_para(line || ' ')));
       }
     });

@@ -188,6 +188,7 @@ export class Wizard {
             ${hint}
             <input class="form-input" type="${field.type}" id="${field.id}" name="${field.id}"
                    ${field.required ? 'required' : ''}
+                   aria-describedby="err-${field.id}"
                    ${field.placeholder ? `placeholder="${field.placeholder}"` : ''}>
             <span class="form-error" id="err-${field.id}" aria-live="polite"></span>
           </div>`;
@@ -200,6 +201,7 @@ export class Wizard {
             <textarea class="form-textarea" id="${field.id}" name="${field.id}"
                       ${field.required ? 'required' : ''}
                       rows="5"
+                      aria-describedby="err-${field.id}"
                       placeholder="${field.placeholder ?? ''}"></textarea>
             <span class="form-error" id="err-${field.id}" aria-live="polite"></span>
           </div>`;
@@ -209,7 +211,9 @@ export class Wizard {
           <div class="form-group" id="fg-${field.id}" ${showIfAttr}>
             <label class="form-label" for="${field.id}">${field.label}${reqMark}</label>
             ${hint}
-            <select class="form-select" id="${field.id}" name="${field.id}" ${field.required ? 'required' : ''}>
+            <select class="form-select" id="${field.id}" name="${field.id}"
+                    ${field.required ? 'required' : ''}
+                    aria-describedby="err-${field.id}">
               ${field.options.map(o => `<option value="${o.value}">${o.label}</option>`).join('')}
             </select>
             <span class="form-error" id="err-${field.id}" aria-live="polite"></span>
@@ -218,13 +222,13 @@ export class Wizard {
       case 'radio':
         return `
           <div class="form-group" id="fg-${field.id}" ${showIfAttr}>
-            <fieldset>
+            <fieldset aria-describedby="err-${field.id}">
               <legend>${field.label}${reqMark}</legend>
               ${hint}
               <div class="radio-group">
                 ${field.options.map(o => `
                   <label class="radio-item">
-                    <input type="radio" name="${field.id}" id="${field.id}" value="${o.value}"
+                    <input type="radio" name="${field.id}" id="${field.id}-${o.value}" value="${o.value}"
                            ${field.required ? 'required' : ''}>
                     <span>${o.label}</span>
                   </label>
@@ -585,8 +589,10 @@ export class Wizard {
       if (fg?.style.display === 'none') return;
 
       let value;
-      const errEl = document.getElementById(`err-${field.id}`);
-      const inputEl = document.getElementById(field.id);
+      const errEl   = document.getElementById(`err-${field.id}`);
+      const inputEl = field.type === 'radio'
+        ? document.querySelector(`input[name="${field.id}"]`)
+        : document.getElementById(field.id);
 
       if (field.type === 'radio') {
         value = document.querySelector(`input[name="${field.id}"]:checked`)?.value;
