@@ -542,6 +542,28 @@ export class Wizard {
     return label.replace(/s$/, '');
   }
 
+  /* ── Public helpers ─────────────────────────────────────────── */
+
+  /**
+   * Programmatically add one or more items to a repeating group.
+   * Each item in the array is a plain object whose keys match subfield ids.
+   *
+   * @param {string}        fieldId - The repeating-group field id (e.g. 'risks').
+   * @param {Array<object>} items   - Values to pre-populate in each new row.
+   */
+  addRepeatingItems(fieldId, items) {
+    const step      = this.steps.find(s => s.fields.some(f => f.id === fieldId));
+    const field     = step?.fields.find(f => f.id === fieldId);
+    const container = document.getElementById(`rg-${fieldId}`);
+    if (!field || !container) return;
+    items.forEach(item => {
+      const idx = container.querySelectorAll('.repeating-group__item').length;
+      this._addRepeatingItem(field, container, idx, item);
+    });
+    this._collectRepeatingGroup(fieldId);
+    this._saveDebounced();
+  }
+
   /* ── State collection ───────────────────────────────────────── */
 
   _collectStep(stepIdx) {

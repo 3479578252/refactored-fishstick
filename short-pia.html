@@ -99,6 +99,26 @@
       <div class="wizard__footer" id="wizard-footer"></div>
     </div>
 
+    <!-- ── Suggest-risks modal ──────────────────────────────────── -->
+    <dialog id="suggest-risks-modal" class="suggest-modal" aria-labelledby="suggest-modal-title">
+      <div class="suggest-modal__header">
+        <h2 id="suggest-modal-title">Suggested privacy risks</h2>
+        <button type="button" class="btn btn--icon btn--sm" id="btn-suggest-close"
+                aria-label="Close suggested risks panel">&#x2715;</button>
+      </div>
+      <p class="suggest-modal__intro">
+        Based on your earlier answers, the following privacy risks may be relevant to this project.
+        Select the ones you would like to add to the register — each will be pre-populated with a
+        suggested description, likelihood, consequence, and treatment you can then edit.
+      </p>
+      <div class="suggest-modal__body" id="suggest-risks-list" role="group"
+           aria-label="Suggested risks"></div>
+      <div class="suggest-modal__footer">
+        <button type="button" class="btn btn--secondary" id="btn-suggest-cancel">Cancel</button>
+        <button type="button" class="btn btn--primary"   id="btn-suggest-confirm">Add selected risks</button>
+      </div>
+    </dialog>
+
   </main>
 
   <footer class="site-footer" role="contentinfo">
@@ -117,9 +137,11 @@
   </footer>
 
   <script type="module">
-    import { Wizard }          from './js/wizard.js';
-    import { STEPS, ASSESSMENT_TYPE } from './js/questions/short-pia.js';
-    import { downloadJSON, downloadDOCX } from './js/export.js';
+    import { Wizard }                          from './js/wizard.js';
+    import { STEPS, ASSESSMENT_TYPE,
+             RISK_SUGGESTIONS }               from './js/questions/short-pia.js';
+    import { downloadJSON, downloadDOCX }     from './js/export.js';
+    import { deriveRisks }                    from './js/risk-suggest.js';
 
     const wizard = new Wizard({
       steps: STEPS,
@@ -129,6 +151,102 @@
       },
     });
     wizard.init();
+
+    // ── Suggest-risks button ─────────────────────────────────────
+    // Inject the button into the risk-register step panel, right after
+    // the callout hint block. The step panels are rendered once at init
+    // and persist in the DOM, so we can safely target them here.
+    (function injectSuggestButton() {
+      const riskStepIdx = STEPS.findIndex(s => s.id === 'risk-register');
+      const riskPanel   = document.getElementById(`step-panel-${riskStepIdx}`);
+      if (!riskPanel) return;
+      const btn = document.createElement('button');
+      btn.type        = 'button';
+      btn.className   = 'btn btn--secondary btn--sm suggest-risks-btn';
+      btn.id          = 'btn-suggest-risks';
+      btn.textContent = 'Suggest risks from your answers';
+      // Insert after the callout, before the repeating-group form-group
+      const callout = riskPanel.querySelector('.callout');
+      if (callout) {
+        callout.insertAdjacentElement('afterend', btn);
+      } else {
+        riskPanel.insertAdjacentElement('afterbegin', btn);
+      }
+    })();
+
+    // ── Suggest-risks modal logic ────────────────────────────────
+    // Look up the human-readable label for a risk_category value.
+    const _riskCategoryOptions = STEPS
+      .find(s => s.id === 'risk-register')
+      .fields[0].subfields
+      .find(sf => sf.id === 'risk_category').options;
+
+    function _categoryLabel(value) {
+      return _riskCategoryOptions.find(o => o.value === value)?.label ?? value;
+    }
+
+    // Open the modal: derive risks, filter already-added ones, render list.
+    document.getElementById('btn-suggest-risks')?.addEventListener('click', () => {
+      const state              = wizard.getState();
+      const existingCategories = new Set(
+        (state.risks ?? []).map(r => r.risk_category).filter(Boolean)
+      );
+      const suggested = deriveRisks(state, RISK_SUGGESTIONS)
+        .filter(r => !existingCategories.has(r.risk_category));
+
+      const listEl = document.getElementById('suggest-risks-list');
+      if (suggested.length === 0) {
+        listEl.innerHTML = `<p class="suggest-risks-empty">
+          No new risks to suggest — all detected risks are already in your register,
+          or not enough information was provided in earlier steps to identify additional risks.
+        </p>`;
+      } else {
+        listEl.innerHTML = suggested.map((risk, i) => `
+          <label class="suggest-risk-item">
+            <input type="checkbox" name="suggest-risk" value="${i}" checked
+                   aria-label="${_categoryLabel(risk.risk_category)}">
+            <div class="suggest-risk-item__content">
+              <span class="suggest-risk-item__title">${_categoryLabel(risk.risk_category)}</span>
+              <p class="suggest-risk-item__desc">${risk.risk_description}</p>
+              <p class="suggest-risk-item__meta">
+                Likelihood: <strong>${risk.likelihood}</strong> &nbsp;|&nbsp;
+                Consequence: <strong>${risk.consequence}</strong> &nbsp;|&nbsp;
+                Rating: <strong>${risk.risk_rating}</strong>
+              </p>
+            </div>
+          </label>
+        `).join('');
+      }
+
+      // Stash derived list on the element for the confirm handler to read.
+      document.getElementById('suggest-risks-modal')._suggested = suggested;
+      document.getElementById('suggest-risks-modal').showModal();
+    });
+
+    function _closeSuggestModal() {
+      document.getElementById('suggest-risks-modal').close();
+    }
+    document.getElementById('btn-suggest-cancel')?.addEventListener('click', _closeSuggestModal);
+    document.getElementById('btn-suggest-close')?.addEventListener('click',  _closeSuggestModal);
+
+    // Close on backdrop click (native <dialog> behaviour for click outside).
+    document.getElementById('suggest-risks-modal')?.addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) _closeSuggestModal();
+    });
+
+    // Confirm: collect checked items and add them to the register.
+    document.getElementById('btn-suggest-confirm')?.addEventListener('click', () => {
+      const modal     = document.getElementById('suggest-risks-modal');
+      const suggested = modal._suggested ?? [];
+      const selected  = [...modal.querySelectorAll('input[name="suggest-risk"]:checked')]
+        .map(cb => suggested[parseInt(cb.value, 10)])
+        .filter(Boolean);
+
+      if (selected.length > 0) {
+        wizard.addRepeatingItems('risks', selected);
+      }
+      modal.close();
+    });
 
     // ── Results ─────────────────────────────────────────────────
     function showResults(state) {
