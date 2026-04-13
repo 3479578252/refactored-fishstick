@@ -784,4 +784,61 @@ export class Wizard {
     this._collectAll();
     return { ...this.state };
   }
+
+  /**
+   * Reset the wizard to a blank state, discarding all saved progress.
+   * Prompts the user for confirmation before clearing.
+   * @returns {boolean} true if the restart proceeded, false if cancelled
+   */
+  restart() {
+    if (!confirm('Start a fresh assessment?\n\nAll current progress — including any saved draft — will be cleared and cannot be recovered.')) {
+      return false;
+    }
+
+    clearState(this.type);
+    this.state       = {};
+    this.currentStep = 0;
+
+    // Reset every form control in the wizard
+    document.getElementById('wizard-steps')
+      ?.querySelectorAll('input, select, textarea')
+      .forEach(el => {
+        if (el.type === 'checkbox' || el.type === 'radio') {
+          el.checked = false;
+        } else {
+          el.value = '';
+        }
+      });
+
+    // Remove all repeating-group items
+    this.steps.forEach(step => {
+      step.fields.forEach(field => {
+        if (field.type === 'repeating-group') {
+          const container = document.getElementById(`rg-${field.id}`);
+          if (container) container.innerHTML = '';
+        }
+      });
+    });
+
+    // Hide any revealed checkbox-other text inputs
+    document.querySelectorAll('.checkbox-other-field').forEach(el => { el.hidden = true; });
+
+    // Clear validation error states
+    document.querySelectorAll('.is-invalid').forEach(el => {
+      el.classList.remove('is-invalid');
+      el.removeAttribute('aria-invalid');
+    });
+    document.querySelectorAll('.form-error').forEach(el => { el.textContent = ''; });
+
+    // If the results view is showing, hide it and restore wizard chrome
+    const resultsView   = document.getElementById('results-view');
+    const wizardFooter  = document.getElementById('wizard-footer');
+    const stepIndicator = document.getElementById('step-indicator');
+    if (resultsView)   resultsView.classList.remove('is-active');
+    if (wizardFooter)  wizardFooter.style.display  = '';
+    if (stepIndicator) stepIndicator.style.display = '';
+
+    this._updateUI();
+    return true;
+  }
 }
