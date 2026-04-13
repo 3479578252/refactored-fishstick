@@ -109,8 +109,8 @@ export class Wizard {
         } else {
           const value = this.state[field.id];
           if (value === undefined || value === null) return;
-          const el = document.getElementById(field.id);
-          if (!el) return;
+
+          // checkbox-other has no single element by id — handle before the el guard
           if (field.type === 'checkbox-other') {
             const values = Array.isArray(value) ? value : (value ? [value] : []);
             const fg = document.getElementById(`fg-${field.id}`);
@@ -124,7 +124,12 @@ export class Wizard {
             const otherVal = this.state[`${field.id}__other`];
             const otherInput = document.getElementById(`${field.id}__other`);
             if (otherInput && otherVal) otherInput.value = otherVal;
-          } else if (field.type === 'checkbox') {
+            return;
+          }
+
+          const el = document.getElementById(field.id);
+          if (!el) return;
+          if (field.type === 'checkbox') {
             const values = Array.isArray(value) ? value : [value];
             el.closest('fieldset')?.querySelectorAll('input[type="checkbox"]').forEach(cb => {
               cb.checked = values.includes(cb.value);
