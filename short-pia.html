@@ -38,6 +38,10 @@
       <label for="import-file" class="visually-hidden">Upload JSON file</label>
       <input class="import-bar__file" type="file" id="import-file" accept=".json"
              aria-label="Upload previously exported JSON file">
+      <button class="btn btn--tertiary btn--sm" id="btn-restart" type="button"
+              aria-label="Discard all progress and start a new assessment">
+        Start fresh
+      </button>
     </div>
 
     <ol class="step-indicator" id="step-indicator" aria-label="Assessment progress"></ol>
@@ -78,6 +82,10 @@
             </button>
             <button class="btn btn--tertiary" id="btn-amend" type="button">
               ← Amend answers
+            </button>
+            <button class="btn btn--tertiary" id="btn-restart-results" type="button"
+                    aria-label="Discard this assessment and start a new one">
+              Start fresh
             </button>
           </div>
 
@@ -186,6 +194,9 @@
       wizard.currentStep = 0;
       wizard._updateUI();
     });
+
+    document.getElementById('btn-restart').addEventListener('click', () => wizard.restart());
+    document.getElementById('btn-restart-results').addEventListener('click', () => wizard.restart());
 
     document.getElementById('footer-year').textContent = new Date().getFullYear();
   </script>
