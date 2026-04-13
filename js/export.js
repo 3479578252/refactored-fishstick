@@ -1,13 +1,29 @@
 /**
  * export.js — JSON and Word (.docx) download for PIA tool.
  *
- * Uses the `docx` library (v8) loaded via CDN as a UMD global (window.docx).
+ * Uses the `docx` library (v8) via a dynamic ES module import from esm.sh.
+ * No <script> tag required — the library is loaded on first use.
  *
  * Usage:
  *   import { downloadJSON, downloadDOCX } from './export.js';
  *   downloadJSON({ type: 'threshold', state, projectName: 'My Project' });
  *   downloadDOCX({ type: 'threshold', state, steps, outcome });
  */
+
+const DOCX_CDN = 'https://esm.sh/docx@8';
+let _docxModule = null;
+
+/** Lazy-load docx on first use. */
+async function getDocx() {
+  if (!_docxModule) {
+    try {
+      _docxModule = await import(DOCX_CDN);
+    } catch (e) {
+      throw new Error('The docx library could not be loaded. Please check your internet connection and try again.');
+    }
+  }
+  return _docxModule;
+}
 
 const SCHEMA_VERSION = '1.0';
 
@@ -68,14 +84,17 @@ export function downloadJSON({ type, state, projectName }) {
  * @param {object}   [opts.outcome]   - Threshold outcome object {title, rationale[]}
  */
 export async function downloadDOCX({ type, state, steps, outcome }) {
-  if (typeof window.docx === 'undefined') {
-    alert('Word export is not available — the docx library failed to load. Please check your internet connection and try again.');
+  let docxLib;
+  try {
+    docxLib = await getDocx();
+  } catch (e) {
+    alert(e.message);
     return;
   }
 
   const { Document, Packer, Paragraph, TextRun, HeadingLevel, Table,
           TableRow, TableCell, WidthType, AlignmentType, ShadingType,
-          BorderStyle } = window.docx;
+          BorderStyle } = docxLib;
 
   const typeLabel = { threshold: 'Threshold Assessment', short: 'Short-form PIA', full: 'Full Privacy Impact Assessment' }[type] ?? type;
   const projectName = state.project_name ?? 'Untitled Project';
@@ -201,73 +220,61 @@ export async function downloadDOCX({ type, state, steps, outcome }) {
 }
 
 /* ── DOCX paragraph helpers ─────────────────────────────────── */
+/* All helpers use _docxModule, which is guaranteed populated before
+   any helper is called (downloadDOCX calls getDocx() first). */
 
 function _para(text, opts = {}) {
   const { bold = false, italic = false, size = 22, color, spaceBefore } = opts;
-  return new window.docx.Paragraph({
+  const { Paragraph, TextRun } = _docxModule;
+  return new Paragraph({
     children: [
-      new window.docx.TextRun({
-        text,
-        bold,
-        italics: italic,
-        size,
-        color,
-        font: 'Calibri',
-      }),
+      new TextRun({ text, bold, italics: italic, size, color, font: 'Calibri' }),
     ],
     spacing: { before: spaceBefore ?? 0, after: 120 },
   });
 }
 
 function _heading1(text) {
-  return new window.docx.Paragraph({
-    text,
-    heading: window.docx.HeadingLevel.HEADING_1,
-    spacing: { before: 480, after: 240 },
-  });
+  const { Paragraph, HeadingLevel } = _docxModule;
+  return new Paragraph({ text, heading: HeadingLevel.HEADING_1, spacing: { before: 480, after: 240 } });
 }
 
 function _heading2(text) {
-  return new window.docx.Paragraph({
-    text,
-    heading: window.docx.HeadingLevel.HEADING_2,
-    spacing: { before: 360, after: 180 },
-  });
+  const { Paragraph, HeadingLevel } = _docxModule;
+  return new Paragraph({ text, heading: HeadingLevel.HEADING_2, spacing: { before: 360, after: 180 } });
 }
 
 function _heading3(text) {
-  return new window.docx.Paragraph({
-    text,
-    heading: window.docx.HeadingLevel.HEADING_3,
-    spacing: { before: 240, after: 120 },
-  });
+  const { Paragraph, HeadingLevel } = _docxModule;
+  return new Paragraph({ text, heading: HeadingLevel.HEADING_3, spacing: { before: 240, after: 120 } });
 }
 
 function _rule() {
-  return new window.docx.Paragraph({
-    thematicBreak: true,
-    spacing: { before: 240, after: 240 },
-  });
+  const { Paragraph } = _docxModule;
+  return new Paragraph({ thematicBreak: true, spacing: { before: 240, after: 240 } });
 }
 
 function _spacer() {
-  return new window.docx.Paragraph({ text: '', spacing: { after: 200 } });
+  const { Paragraph } = _docxModule;
+  return new Paragraph({ text: '', spacing: { after: 200 } });
 }
 
 function _tableHeaderCell(text) {
-  return new window.docx.TableCell({
-    children: [new window.docx.Paragraph({
-      children: [new window.docx.TextRun({ text, bold: true, size: 18, font: 'Calibri', color: 'FFFFFF' })],
+  const { TableCell, Paragraph, TextRun, ShadingType } = _docxModule;
+  return new TableCell({
+    children: [new Paragraph({
+      children: [new TextRun({ text, bold: true, size: 18, font: 'Calibri', color: 'FFFFFF' })],
     })],
-    shading: { type: window.docx.ShadingType.SOLID, color: '00698F' },
-    margins:  { top: 80, bottom: 80, left: 120, right: 120 },
+    shading: { type: ShadingType.SOLID, color: '00698F' },
+    margins: { top: 80, bottom: 80, left: 120, right: 120 },
   });
 }
 
 function _tableCell(text) {
-  return new window.docx.TableCell({
-    children: [new window.docx.Paragraph({
-      children: [new window.docx.TextRun({ text: text || '—', size: 18, font: 'Calibri' })],
+  const { TableCell, Paragraph, TextRun } = _docxModule;
+  return new TableCell({
+    children: [new Paragraph({
+      children: [new TextRun({ text: text || '—', size: 18, font: 'Calibri' })],
     })],
     margins: { top: 80, bottom: 80, left: 120, right: 120 },
   });
