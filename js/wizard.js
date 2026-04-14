@@ -474,7 +474,7 @@ export class Wizard {
           </div>`;
       case 'select': {
         const suggestAttrs = sf.suggestField
-          ? `data-suggest-field="${sf.suggestField}" data-suggestions='${JSON.stringify(sf.suggestions ?? {})}'`
+          ? `data-suggest-field="${sf.suggestField}" data-suggestions='${JSON.stringify(sf.suggestions ?? {}).replace(/'/g, '&#39;')}'`
           : '';
         return `
           <div class="form-group ${full}">
